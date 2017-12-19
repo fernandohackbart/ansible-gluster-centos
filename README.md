@@ -11,7 +11,7 @@ Clean up the guests for reinstall
 ```
 virsh destroy dcos-gluster1;virsh undefine dcos-gluster1;rm -rf /opt/dcos/guests/dcos-gluster1
 virsh destroy dcos-gluster2;virsh undefine dcos-gluster2;rm -rf /opt/dcos/guests/dcos-gluster2
-
+```
 
 Create the guests (requires to have the dcos-pxe configured and running as per https://github.com/fernandohackbart/ansible-pxe-centos
 ```
