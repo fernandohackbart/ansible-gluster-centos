@@ -1,0 +1,10 @@
+---
+gluster_device: "/dev/vdb"
+gluster_vg_name: "vg_gluster"
+gluster_lv_name: "brick1"
+gluster_root_folder: "/bricks"
+gluster_volume_name: "glustervol1"
+gluster_volume_folder: "brick1"
+gluster_volume_size: "5G"
+gluster_server1: "k8s-gluster1.prototype.local"
+gluster_server2: "k8s-gluster2.prototype.local"

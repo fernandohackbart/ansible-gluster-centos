@@ -1,0 +1,7 @@
+---
+- name: "Install gluster servers"
+  hosts: glusterservers
+  remote_user: root
+  roles:
+    - gluster-server
+
