@@ -1,0 +1,40 @@
+{
+    "clusters": [
+        {
+            "nodes": [
+                {
+                    "node": {
+                        "hostnames": {
+                            "manage": [
+                                "{{ gluster_server1 }}"
+                            ],
+                            "storage": [
+                                "{{ gluster_server1 }}"
+                            ]
+                        },
+                        "zone": 1
+                    },
+                    "devices": [
+                        "{{ gluster_device }}"
+                    ]
+                },
+                {
+                    "node": {
+                        "hostnames": {
+                            "manage": [
+                                "{{ gluster_server2 }}"
+                            ],
+                            "storage": [
+                                "{{ gluster_server2 }}"
+                            ]
+                        },
+                        "zone": 2
+                    },
+                    "devices": [
+                        "{{ gluster_device }}"
+                    ]
+                }
+            ]
+        }
+    ]
+} 

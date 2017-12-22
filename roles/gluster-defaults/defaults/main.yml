@@ -1,4 +1,5 @@
 ---
+gluster_create_volume: false
 gluster_device: "/dev/vdb"
 gluster_vg_name: "vg_gluster"
 gluster_lv_name: "brick1"

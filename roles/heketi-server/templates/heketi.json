@@ -1,0 +1,32 @@
+{
+  "port": "8080",
+  "use_auth": false,
+  "jwt": {
+    "admin": {
+      "key": "MySecret"
+    },
+    "user": {
+      "key": "MySecret"
+    }
+  },
+  "glusterfs": {
+    "executor": "ssh",
+    "sshexec": {
+      "keyfile": "/etc/heketi/heketi_key",
+      "user": "root",
+      "port": "22",
+      "fstab": "/etc/fstab"
+    },
+    "kubeexec": {
+      "host" :"https://kubernetes.host:8443",
+      "cert" : "/path/to/crt.file",
+      "insecure": false,
+      "user": "kubernetes username",
+      "password": "password for kubernetes user",
+      "namespace": "default",
+      "fstab": "/etc/fstab"
+    },
+    "db": "/var/lib/heketi/heketi.db",
+    "loglevel" : "debug"
+  }
+} 

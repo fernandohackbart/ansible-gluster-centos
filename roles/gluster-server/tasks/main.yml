@@ -1,33 +1,4 @@
 ---
-- name: Create volume group {{ gluster_vg_name }} over the provided disk {{ gluster_device }}
-  lvg:
-    vg: "{{ gluster_vg_name }}"
-    pvs: "{{ gluster_device }}"
-    
-- name: Create logical volume {{ gluster_lv_name }} over vg {{ gluster_vg_name }}
-  lvol:
-    vg: "{{ gluster_vg_name }}"
-    lv: "{{ gluster_lv_name }}"
-    size: "{{ gluster_volume_size }}"
-
-- name: Create volume group {{ gluster_vg_name }} over the provided disk {{ gluster_device }}
-  filesystem:
-    fstype: xfs
-    dev: /dev/{{ gluster_vg_name }}/{{ gluster_lv_name }}
-
-- name: Create directory {{ gluster_root_folder }}/{{ gluster_volume_folder }}
-  file:
-    path: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}"
-    state: directory
-    mode: 0755
-
-- name: Mount up /dev/{{ gluster_vg_name }}/{{ gluster_lv_name }} {{ gluster_root_folder }}/{{ gluster_volume_folder }}
-  mount:
-    path: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}"
-    src: "/dev/{{ gluster_vg_name }}/{{ gluster_lv_name }}"
-    fstype: xfs
-    state: mounted
-    
 - name: Install centos-release-gluster 
   package:
     name: centos-release-gluster
@@ -46,18 +17,52 @@
     enabled: yes
     state: started
 
-- name: Create gluster {{ gluster_volume_name }} volume
-  gluster_volume:
-    state: present
-    name: "{{ gluster_volume_name }}"
-    bricks: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}/brick"
-    rebalance: yes
-    cluster:
-      - "{{ gluster_server1 }}"
-      - "{{ gluster_server2 }}"
-  run_once: true
+- name: Create volume {{ gluster_volume_name }}
+  block:
 
-- name: Start gluster {{ gluster_volume_name }} volume
-  gluster_volume:
-    name: "{{ gluster_volume_name }}"
-    state: started    
+  - name: Create volume group {{ gluster_vg_name }} over the provided disk {{ gluster_device }}
+    lvg:
+      vg: "{{ gluster_vg_name }}"
+      pvs: "{{ gluster_device }}"
+    
+  - name: Create logical volume {{ gluster_lv_name }} over vg {{ gluster_vg_name }}
+    lvol:
+      vg: "{{ gluster_vg_name }}"
+      lv: "{{ gluster_lv_name }}"
+      size: "{{ gluster_volume_size }}"
+
+  - name: Create volume group {{ gluster_vg_name }} over the provided disk {{ gluster_device }}
+    filesystem:
+      fstype: xfs
+      dev: /dev/{{ gluster_vg_name }}/{{ gluster_lv_name }}
+
+  - name: Create directory {{ gluster_root_folder }}/{{ gluster_volume_folder }}
+    file:
+      path: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}"
+      state: directory
+      mode: 0755
+
+  - name: Mount up /dev/{{ gluster_vg_name }}/{{ gluster_lv_name }} {{ gluster_root_folder }}/{{ gluster_volume_folder }}
+    mount:
+      path: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}"
+      src: "/dev/{{ gluster_vg_name }}/{{ gluster_lv_name }}"
+      fstype: xfs
+      state: mounted
+    
+  - name: Create gluster {{ gluster_volume_name }} volume
+    gluster_volume:
+      state: present
+      name: "{{ gluster_volume_name }}"
+      bricks: "{{ gluster_root_folder }}/{{ gluster_volume_folder }}/brick"
+      rebalance: yes
+      cluster:
+        - "{{ gluster_server1 }}"
+        - "{{ gluster_server2 }}"
+    run_once: true
+
+  - name: Start gluster {{ gluster_volume_name }} volume
+    gluster_volume:
+      name: "{{ gluster_volume_name }}"
+      state: started    
+  when:
+    gluster_create_volume == True

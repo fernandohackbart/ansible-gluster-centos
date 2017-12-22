@@ -1,0 +1,49 @@
+---
+- name: Install heketi
+  package:
+    name: heketi
+    state: latest
+
+- name: Install heketi-client
+  package:
+    name: heketi-client
+    state: heketi-client
+
+- name: Create Heketi SSH key pairs
+  shell: "ssh-keygen -f /etc/heketi/heketi_key -t rsa -N ''"
+  args:
+    chdir: "/tmp"
+    
+- name: Change ownership of /etc/heketi/heketi_key* to heketi
+  shell: "chown heketi:heketi /etc/heketi/heketi_key*"
+  args:
+    chdir: "/tmp"
+
+# prompt for passwords
+#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster1.prototype.local
+#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster2.prototype.local    
+
+#template
+#vi /etc/heketi/heketi.json
+
+#fix file from -config to --config
+#/usr/lib/systemd/system/heketi.service
+
+- name: Enable and start heketi
+  service:
+    name: heketi
+    enabled: yes
+    state: started
+    
+- name: Create /tmp/topology.json
+  template:
+    src: topology.json
+    dest: /tmp/topology.json
+    mode: 0644  
+    
+- name: Create topology from /tmp/topology.json
+  shell: "heketi-cli topology load -j /tmp/topology.json"
+  args:
+    chdir: "/tmp"
+  environment:
+    HEKETI_CLI_SERVER: "http://localhost:8080"
