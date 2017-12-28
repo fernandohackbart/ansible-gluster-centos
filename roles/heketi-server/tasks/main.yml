@@ -7,12 +7,13 @@
 - name: Install heketi-client
   package:
     name: heketi-client
-    state: heketi-client
+    state: latest
 
 - name: Create Heketi SSH key pairs
   shell: "ssh-keygen -f /etc/heketi/heketi_key -t rsa -N ''"
   args:
     chdir: "/tmp"
+  ignore_errors: true
     
 - name: Change ownership of /etc/heketi/heketi_key* to heketi
   shell: "chown heketi:heketi /etc/heketi/heketi_key*"
@@ -22,12 +23,18 @@
 # prompt for passwords
 #ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster1.prototype.local
 #ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster2.prototype.local    
+#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster3.prototype.local
 
-#template
-#vi /etc/heketi/heketi.json
+- name: Create /etc/heketi/heketi.json
+  template:
+    src: heketi.json
+    dest: /etc/heketi/heketi.json
+    mode: 0644    
 
-#fix file from -config to --config
-#/usr/lib/systemd/system/heketi.service
+- name: Change ownership of /etc/heketi/heketi_key* to heketi
+  shell: "sed -i 's/ -config/ --config/g' /usr/lib/systemd/system/heketi.service"
+  args:
+    chdir: "/tmp"
 
 - name: Enable and start heketi
   service:

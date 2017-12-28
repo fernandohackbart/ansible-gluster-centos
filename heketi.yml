@@ -1,0 +1,7 @@
+---
+- name: "Install heketi servers"
+  hosts: heketiservers
+  remote_user: root
+  roles:
+    - heketi-server
+
