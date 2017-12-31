@@ -13,3 +13,5 @@ gluster_server3: "k8s-gluster3.prototype.local"
 gluster_server1_ip: "192.168.40.44"
 gluster_server2_ip: "192.168.40.45"
 gluster_server3_ip: "192.168.40.46"
+gluster_cluster_size: 2
+gluster_root_password: "Welcome1"

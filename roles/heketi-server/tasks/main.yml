@@ -8,30 +8,76 @@
   package:
     name: heketi-client
     state: latest
-
+    
+- name: Install expect
+  package:
+    name: expect
+    state: latest
+    
+- name: Check if /etc/heketi/heketi_key exists
+  stat: 
+    path: /etc/heketi/heketi_key
+  register: keyfile_exists
+  
 - name: Create Heketi SSH key pairs
   shell: "ssh-keygen -f /etc/heketi/heketi_key -t rsa -N ''"
   args:
     chdir: "/tmp"
-  ignore_errors: true
+  when: not keyfile_exists.stat.exists
     
-- name: Change ownership of /etc/heketi/heketi_key* to heketi
-  shell: "chown heketi:heketi /etc/heketi/heketi_key*"
+- name: Change ownership of /etc/heketi/heketi_key to heketi
+  file:
+    path: "/etc/heketi/heketi_key"
+    owner: heketi
+    group: heketi
+  when: keyfile_exists.stat.exists
+  
+- name: Change ownership of /etc/heketi/heketi_key.pub to heketi
+  file:
+    path: "/etc/heketi/heketi_key.pub"
+    owner: heketi
+    group: heketi
+  
+- name: Copy SSH fingerprint to {{ gluster_server1 }}
+  shell: |
+    set timeout 300
+    spawn ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/heketi/heketi_key root@{{ gluster_server1 }}
+    expect "root@{{ gluster_server1 }}\'s password" { send {{ gluster_root_password }}\r }
+    expect eof    
+#    interact
   args:
-    chdir: "/tmp"
+    executable: /usr/bin/expect
 
-# prompt for passwords
-#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster1.prototype.local
-#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster2.prototype.local    
-#ssh-copy-id -i /etc/heketi/heketi_key root@k8s-gluster3.prototype.local
-
+- name: Copy SSH fingerprint to {{ gluster_server2 }}
+  shell: |
+    set timeout 300
+    spawn ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/heketi/heketi_key root@{{ gluster_server2 }}
+    expect "root@{{ gluster_server2 }}\'s password" { send {{ gluster_root_password }}\r }
+    expect eof    
+#    interact
+  args:
+    executable: /usr/bin/expect
+    
+- name: Copy SSH fingerprint to {{ gluster_server3 }}
+  shell: |
+    set timeout 300
+    spawn ssh-copy-id -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i /etc/heketi/heketi_key root@{{ gluster_server3 }}
+    expect "root@{{ gluster_server3 }}\'s password" { send {{ gluster_root_password }}\r }
+    expect eof    
+#    interact
+  args:
+    executable: /usr/bin/expect
+  when: gluster_cluster_size==3
+    
 - name: Create /etc/heketi/heketi.json
   template:
     src: heketi.json
     dest: /etc/heketi/heketi.json
     mode: 0644    
+    owner: heketi
+    group: heketi    
 
-- name: Change ownership of /etc/heketi/heketi_key* to heketi
+- name: Fixing the startup script from -config to --config
   shell: "sed -i 's/ -config/ --config/g' /usr/lib/systemd/system/heketi.service"
   args:
     chdir: "/tmp"
@@ -42,11 +88,19 @@
     enabled: yes
     state: started
     
-- name: Create /tmp/topology.json
+- name: Create /tmp/topology.json for 2 nodes
   template:
-    src: topology.json
+    src: topology-2node.json
     dest: /tmp/topology.json
     mode: 0644  
+  when: gluster_cluster_size==2
+  
+- name: Create /tmp/topology.json for 3 nodes
+  template:
+    src: topology-3node.json
+    dest: /tmp/topology.json
+    mode: 0644  
+  when: gluster_cluster_size==3
     
 - name: Create topology from /tmp/topology.json
   shell: "heketi-cli topology load -j /tmp/topology.json"
