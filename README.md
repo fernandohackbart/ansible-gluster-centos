@@ -30,6 +30,7 @@ virt-install \
  --disk path=/opt/k8s/guests/k8s-gluster1/k8s-gluster1.img,bus=virtio,size=7 \
  --disk path=/opt/k8s/guests/k8s-gluster1/k8s-gluster1-data1.img,bus=virtio,size=20 \
  --pxe \
+ --boot=hd,network \ 
  --network=bridge:dcos-br0,model=virtio,mac=52:54:00:e2:87:62
 
 mkdir -p /opt/k8s/guests/k8s-gluster2
@@ -46,6 +47,7 @@ virt-install \
  --disk path=/opt/k8s/guests/k8s-gluster2/k8s-gluster2.img,bus=virtio,size=7 \
  --disk path=/opt/k8s/guests/k8s-gluster2/k8s-gluster2-data1.img,bus=virtio,size=20 \
  --pxe \
+ --boot=hd,network \ 
  --network=bridge:dcos-br0,model=virtio,mac=52:54:00:e2:87:63
 
 mkdir -p /opt/k8s/guests/k8s-gluster3
@@ -62,6 +64,7 @@ virt-install \
  --disk path=/opt/k8s/guests/k8s-gluster3/k8s-gluster3.img,bus=virtio,size=7 \
  --disk path=/opt/k8s/guests/k8s-gluster3/k8s-gluster3-data1.img,bus=virtio,size=20 \
  --pxe \
+ --boot=hd,network \ 
  --network=bridge:dcos-br0,model=virtio,mac=52:54:00:e2:87:64
 
 virsh start k8s-gluster1
